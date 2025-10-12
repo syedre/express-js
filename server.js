@@ -4,9 +4,17 @@
 
 const express = require("express");
 const { Client } = require("pg");
+const cors = require("cors");
 
 // Middleware to parse JSON bodies
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // explicitly allow your React app
+  })
+);
+
 app.use(express.json());
 
 // Database connection setup
@@ -51,7 +59,7 @@ app.get("/books", async (req, res) => {
   }
 });
 
-const port = 3000;
+const port = 5001;
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
