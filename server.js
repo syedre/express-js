@@ -59,6 +59,26 @@ app.get("/books", async (req, res) => {
   }
 });
 
+// Route to list non-system tables in the current database
+app.get("/tables", async (req, res) => {
+  const listTablesQuery = `
+    SELECT table_schema, table_name
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE'
+      AND table_schema NOT IN ('pg_catalog', 'information_schema')
+    ORDER BY table_schema, table_name;
+  `;
+  try {
+    const result = await con.query(listTablesQuery);
+    // Map to a simple representation: schema.table
+    const tables = result.rows.map((r) => `${r.table_name}`);
+    res.json(tables);
+  } catch (err) {
+    console.error("Error listing tables:", err);
+    res.status(500).json({ error: "Failed to list tables" });
+  }
+});
+
 const port = 5001;
 // Start the server
 app.listen(port, () => {
