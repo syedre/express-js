@@ -5,6 +5,10 @@
 const express = require("express");
 const { Client } = require("pg");
 const cors = require("cors");
+const uploadFileToS3 = require("./s3Uploader");
+const multer = require("multer");
+
+require("dotenv").config();
 
 // Middleware to parse JSON bodies
 const app = express();
@@ -76,6 +80,21 @@ app.get("/tables", async (req, res) => {
   } catch (err) {
     console.error("Error listing tables:", err);
     res.status(500).json({ error: "Failed to list tables" });
+  }
+});
+
+const upload = multer({ storage: multer.memoryStorage() });
+app.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const imageUrl = await uploadFileToS3(req.file);
+    res.json({ imageUrl });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Failed to upload image" });
   }
 });
 
