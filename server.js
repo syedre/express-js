@@ -45,9 +45,9 @@ con
 
 // Sample route
 
-// app.get("/", (req, res) => {
-//   res.send("Hello World!");
-// });
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 // Route to display data from Users table
 app.get("/users", async (req, res) => {
@@ -60,13 +60,13 @@ app.get("/users", async (req, res) => {
   }
 });
 
-app.get("/books", async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
-    const result = await con.query(`SELECT * FROM books`);
+    const result = await con.query(`SELECT * FROM products`);
     res.json(result.rows);
   } catch (err) {
-    console.error("Error fetching books:", err);
-    res.status(500).json({ error: "Failed to fetch books" });
+    console.error("Error fetching products:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
