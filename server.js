@@ -22,12 +22,19 @@ app.use(
 app.use(express.json());
 
 // Database connection setup
+// const con = new Client({
+//   user: "rehan",
+//   host: "localhost",
+//   database: "test_db",
+//   password: "rehan",
+//   port: 5432,
+// });
+
 const con = new Client({
-  user: "rehan",
-  host: "localhost",
-  database: "test_db",
-  password: "rehan",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 // connect database
