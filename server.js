@@ -45,9 +45,9 @@ con
 
 // Sample route
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+// app.get("/", (req, res) => {
+//   res.send("Hello World!");
+// });
 
 // Route to display data from Users table
 app.get("/users", async (req, res) => {
