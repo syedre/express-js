@@ -80,6 +80,28 @@ app.get("/listtodos", async (req, res) => {
   }
 });
 
+app.delete("/api/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await con.query(
+      "DELETE FROM todos WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Todo deleted", todo: result.rows[0] });
+  } catch (err) {
+    console.error("Error deleting todo:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // route to post name and description to todos table
 app.post("/todos", async (req, res) => {
   const { name, description } = req.body;
