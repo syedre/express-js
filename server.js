@@ -3,15 +3,18 @@
 // Route to create Books table
 
 const express = require("express");
+const app = express();
+
 const { Client } = require("pg");
+
 const cors = require("cors");
+
 const uploadFileToS3 = require("./s3Uploader");
 const multer = require("multer");
 
 require("dotenv").config();
 
 // Middleware to parse JSON bodies
-const app = express();
 
 app.use(
   cors({
@@ -20,22 +23,27 @@ app.use(
 );
 
 app.use(express.json());
+// Middleware to parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
 
 // Database connection setup
-// const con = new Client({
-//   user: "rehan",
-//   host: "localhost",
-//   database: "test_db",
-//   password: "rehan",
-//   port: 5432,
-// });
-
 const con = new Client({
-  connectionString: process.env.DATABASE_URL,
+  user: "postgres",
+  host: "database-1.c3oooeqq27cv.ap-south-1.rds.amazonaws.com",
+  database: "my_new_db",
+  password: "postgres",
+  port: 5432,
   ssl: {
     rejectUnauthorized: false,
   },
 });
+
+// const con = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
 // connect database
 con
@@ -57,6 +65,34 @@ app.get("/users", async (req, res) => {
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+app.get("/listtodos", async (req, res) => {
+  try {
+    const result = await con.query(
+      `SELECT * FROM todos where user_id='d3131912-10f8-4668-b247-465cd230059b'`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching todos:", err);
+    res.status(500).json({ error: "Failed to fetch todos" });
+  }
+});
+
+// route to post name and description to todos table
+app.post("/todos", async (req, res) => {
+  const { name, description } = req.body;
+  const user_id = "d3131912-10f8-4668-b247-465cd230059b"; // Hardcoded user_id for demonstration
+  try {
+    const result = await con.query(
+      `INSERT INTO todos (name, description,user_id) VALUES ($1, $2, $3) RETURNING *`,
+      [name, description, user_id]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Error creating todo:", err);
+    res.status(500).json({ error: "Failed to create todo" });
   }
 });
 
