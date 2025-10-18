@@ -118,6 +118,37 @@ app.post("/todos", async (req, res) => {
   }
 });
 
+// PUT route to update a todo
+app.put("/updatetodo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    // Validate input
+    if (!name || !description) {
+      return res
+        .status(400)
+        .json({ error: "Name and description are required" });
+    }
+
+    const result = await con.query(
+      `UPDATE todos 
+       SET name = $1, description = $2
+       WHERE id = $3 RETURNING *`,
+      [name, description, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    res.json({ message: "Todo updated successfully", todo: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.get("/products", async (req, res) => {
   try {
     const result = await con.query(`SELECT * FROM products`);
