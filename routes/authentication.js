@@ -4,7 +4,7 @@ const con = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = process.env.JWT_SECRET || "mysecretkey";
+const SECRET_KEY = process.env.JWT_SECRET;
 
 router.post("/signup", async (req, res) => {
   const { email, password, name } = req.body;
