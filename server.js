@@ -9,6 +9,7 @@ const multer = require("multer");
 require("dotenv").config();
 
 // import routes
+const authenticationRoutes = require("./routes/authentication");
 const todosRoutes = require("./routes/todosRoutes");
 const userRoutes = require("./routes/userRoutes");
 
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 // use routes
 app.use("/", todosRoutes);
 app.use("/", userRoutes);
+app.use("/", authenticationRoutes);
 
 const upload = multer({ storage: multer.memoryStorage() });
 app.post("/upload", upload.single("image"), async (req, res) => {

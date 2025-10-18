@@ -1,13 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const con = require("../db");
+const jwt = require("jsonwebtoken");
+
+const SECRET_KEY = process.env.JWT_SECRET;
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader)
+    return res.status(401).json({ message: "No token provided" });
+
+  const token = authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Token missing" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded; // attach user info (id, email, etc.) to request
+    next();
+  } catch (err) {
+    console.error("Invalid token:", err);
+    return res.status(403).json({ message: "Invalid or expired token" });
+  }
+}
 
 // to list all todos
-router.get("/listtodos", async (req, res) => {
+router.get("/listtodos", authenticateToken, async (req, res) => {
   try {
-    const result = await con.query(
-      `SELECT * FROM todos where user_id='d3131912-10f8-4668-b247-465cd230059b'`
-    );
+    const userId = req.user.id; // Get user ID from token
+    const result = await con.query(`SELECT * FROM todos WHERE user_id = $1`, [
+      userId,
+    ]);
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching todos:", err);
@@ -16,13 +38,14 @@ router.get("/listtodos", async (req, res) => {
 });
 
 // to post a todo
-router.post("/todos", async (req, res) => {
+router.post("/todos", authenticateToken, async (req, res) => {
   const { name, description } = req.body;
-  const user_id = "d3131912-10f8-4668-b247-465cd230059b"; // Hardcoded user_id for demonstration
+  const userId = req.user.id;
+
   try {
     const result = await con.query(
-      `INSERT INTO todos (name, description,user_id) VALUES ($1, $2, $3) RETURNING *`,
-      [name, description, user_id]
+      `INSERT INTO todos (name, description, user_id) VALUES ($1, $2, $3) RETURNING *`,
+      [name, description, userId]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
