@@ -1,11 +1,6 @@
-// Route to insert sample values into Books table
-
-// Route to create Books table
-
 const express = require("express");
 const app = express();
-
-const { Client } = require("pg");
+const con = require("./db");
 
 const cors = require("cors");
 
@@ -26,18 +21,6 @@ app.use(express.json());
 // Middleware to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Database connection setup
-const con = new Client({
-  user: "postgres",
-  host: "database-1.c3oooeqq27cv.ap-south-1.rds.amazonaws.com",
-  database: "my_new_db",
-  password: "postgres",
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-
 // const con = new Client({
 //   connectionString: process.env.DATABASE_URL,
 //   ssl: {
@@ -45,7 +28,6 @@ const con = new Client({
 //   },
 // });
 
-// connect database
 con
   .connect()
   .then(() => console.log("Connected to the database"))
