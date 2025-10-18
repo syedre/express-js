@@ -16,7 +16,10 @@ const userRoutes = require("./routes/userRoutes");
 // explicitly allow your React app
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://sample-app-gray-omega.vercel.app",
+    ],
   })
 );
 
