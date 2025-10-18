@@ -1,11 +1,12 @@
 const { Client } = require("pg");
+require("dotenv").config();
 
 const con = new Client({
-  user: "postgres",
-  host: "database-1.c3oooeqq27cv.ap-south-1.rds.amazonaws.com",
-  database: "my_new_db",
-  password: "postgres",
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
   ssl: {
     rejectUnauthorized: false,
   },
