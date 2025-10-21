@@ -27,9 +27,16 @@ function authenticateToken(req, res, next) {
 router.get("/listtodos", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id; // Get user ID from token
-    const result = await con.query(`SELECT * FROM todos WHERE user_id = $1`, [
-      userId,
-    ]);
+    const result = await con.query(
+      `SELECT 
+    t.*, 
+    u.name AS user_name, 
+    u.email AS user_email
+  FROM todos t
+  JOIN users u ON t.user_id = u.id
+  WHERE t.user_id = $1`,
+      [userId]
+    );
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching todos:", err);
