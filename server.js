@@ -12,6 +12,7 @@ require("dotenv").config();
 const authenticationRoutes = require("./routes/authentication");
 const todosRoutes = require("./routes/todosRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/admin");
 
 // explicitly allow your React app
 app.use(
@@ -49,6 +50,7 @@ app.get("/", (req, res) => {
 // use routes
 app.use("/", todosRoutes);
 app.use("/", userRoutes);
+app.use("/", adminRoutes);
 app.use("/", authenticationRoutes);
 
 const upload = multer({ storage: multer.memoryStorage() });
