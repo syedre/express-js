@@ -29,20 +29,6 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// const con = new Client({
-//   connectionString: process.env.DATABASE_URL,
-//   ssl: {
-//     rejectUnauthorized: false,
-//   },
-// });
-
-con
-  .connect()
-  .then(() => console.log("Connected to the database"))
-  .catch((err) => console.error("Database connection error:", err));
-
-// Sample route
-
 app.get("/", (req, res) => {
   res.send("Hello World! newww changes");
 });
