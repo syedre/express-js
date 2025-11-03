@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
       email,
     ]);
     if (result.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "User does not exist" });
     }
 
     const user = result.rows[0];
