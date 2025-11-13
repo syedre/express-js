@@ -4,6 +4,7 @@ const con = require("../db");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const verify_user = {};
 
@@ -35,34 +36,51 @@ router.post("/send-email", async (req, res) => {
       text: `The generated OTP is ${otp}`,
     });
 
-    res.json({ success: true, message: "Email sent successfully!" });
-    verify_user.otp = otp;
     verify_user.email = email;
-    console.log(verify_user);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    await con.query(
+      "INSERT INTO user_otp (email, otp, expires_at) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET otp = $2, expires_at = $3",
+      [email, otp, expiresAt]
+    );
+
+    res.json({ success: true, message: "Email sent successfully!" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error sending email." });
   }
 });
 
-router.post("/verify-otp", (req, res) => {
+router.post("/verify-otp", async (req, res) => {
   const { otp } = req.body;
-  console.log(otp, "user otp");
-  console.log(verify_user, "stored otp");
-  if (Number(otp) !== verify_user?.otp) {
-    delete verify_user.otp;
-    delete verify_user.email;
+  const result = await con.query("SELECT * FROM user_otp WHERE email = $1", [
+    verify_user.email,
+  ]);
+
+  if (result.rows.length === 0) {
+    return res.status(400).json({ message: "Please Re-Generate OTP" });
+  }
+
+  const { otp: storedOtp, expires_at } = result.rows[0];
+  if (new Date() > expires_at) {
+    return res.status(400).json({ message: "OTP expired" });
+  }
+
+  if (Number(otp) !== Number(storedOtp)) {
     return res.status(400).json({ message: "Invalid otp" });
   }
-  delete verify_user.otp;
-  delete verify_user.email;
-  console.log(verify_user);
+  const token = jwt.sign({ email: verify_user.email }, process.env.JWT_SECRET, {
+    expiresIn: "5m",
+  });
 
-  return res.json({ message: "success" });
+  delete verify_user.email;
+
+  return res.json({ message: "success", token: token });
 });
 
 router.put("/reset-password", async (req, res) => {
-  const { new_password, email } = req.body;
+  const { new_password, token } = req.body;
+  const { email } = jwt.verify(token, process.env.JWT_SECRET);
+
   const hashedPassword = await bcrypt.hash(new_password, 10);
   try {
     const result = await con.query(
@@ -72,7 +90,7 @@ router.put("/reset-password", async (req, res) => {
       [hashedPassword, email]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "password not updated" });
+      return res.status(404).json({ error: "User not found" });
     }
     res.json({ message: "Password updated successfully", success: true });
   } catch (err) {
