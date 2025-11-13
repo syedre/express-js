@@ -13,6 +13,7 @@ const authenticationRoutes = require("./routes/authentication");
 const todosRoutes = require("./routes/todosRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/admin");
+const emailRoutes = require("./routes/email");
 
 // explicitly allow your React app
 app.use(
@@ -52,6 +53,7 @@ app.use("/", todosRoutes);
 app.use("/", userRoutes);
 app.use("/", adminRoutes);
 app.use("/", authenticationRoutes);
+app.use("/", emailRoutes);
 
 const upload = multer({ storage: multer.memoryStorage() });
 app.post("/upload", upload.single("image"), async (req, res) => {
