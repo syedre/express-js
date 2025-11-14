@@ -24,7 +24,9 @@ router.post("/send-email", async (req, res) => {
     [email]
   );
   if (existingUser.rows.length === 0) {
-    return res.status(400).json({ message: "User does not exist" });
+    return res
+      .status(400)
+      .json({ message: "User does not exist", success: false });
   }
   const otp = crypto.randomInt(100000, 999999);
 
@@ -90,7 +92,7 @@ router.put("/reset-password", async (req, res) => {
       [hashedPassword, email]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json({ message: "Password updated successfully", success: true });
   } catch (err) {
