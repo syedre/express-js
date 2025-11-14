@@ -54,8 +54,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-const port = 5001;
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+const port = process.env.PORT || 5001;
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}`);
 });
